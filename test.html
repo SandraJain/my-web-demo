@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>投資風格測驗 Demo（第二個系統功能）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", sans-serif;
+      background: #e3edf7;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px 8px;
+    }
+
+    /* Phone frame */
+    .phone {
+      width: 360px;
+      max-width: 100%;
+      background: #f7f9fb;
+      border-radius: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      position: relative;
+
+        /* 新增這一行：固定手機高度，所有畫面都一樣高 */
+        height: 760px;
+
+      --primary-blue: #4a9fe6;
+      --primary-blue-dark: #2f6ca0;
+      --secondary-light-blue: #e8f4fb;
+      --secondary-gray-blue: #7a8fa3;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-light: #999999;
+      --up-red: #e55252;
+      --down-green: #27a65b;
+      --bg-body: #f7f9fb;
+      --bg-card: #ffffff;
+      --dark-panel: #111821;
+      --dark-panel-soft: #1c2633;
+      --accent-pink: #01319d;
+    }
+
+    .status-bar {
+      height: 18px;
+      background: #000;
+      opacity: 0.9;
+    }
+
+    .app-header {
+      background: linear-gradient(180deg, var(--primary-blue-dark), var(--primary-blue));
+      padding: 8px 12px 10px;
+      color: #fff;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .header-icon-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Market tabs */
+    .market-tabs {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .market-tab {
+      flex: 0 0 auto;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.18);
+      color: #eaf4ff;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .market-tab.active {
+      background: #ffffff;
+      color: var(--primary-blue-dark);
+      border-color: rgba(0, 0, 0, 0.06);
+      font-weight: 600;
+    }
+
+    .app-body {
+      background: var(--bg-body);
+      padding: 8px 10px 60px;
+      height: calc(100% - 18px - 58px);
+      overflow-y: auto;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* --- 首頁 (與第一個系統流程相同) --- */
+    .asset-card {
+      background: var(--accent-pink);
+      color: #fff;
+      border-radius: 10px 10px 6px 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: default;
+    }
+
+    .asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .asset-header span {
+      font-weight: 600;
+    }
+
+    .dots {
+      letter-spacing: 3px;
+      font-size: 16px;
+    }
+
+    .asset-lines {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .dark-panel {
+      background: var(--dark-panel);
+      border-radius: 8px;
+      padding: 10px 10px 12px;
+      color: #d3d9e3;
+      margin-bottom: 10px;
+    }
+
+    .calendar-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .calendar-day {
+      flex: 1;
+      text-align: center;
+      padding: 4px 0;
+      border-radius: 5px;
+      margin: 0 1px;
+      cursor: pointer;
+    }
+
+    .calendar-day.active {
+      background: var(--secondary-light-blue);
+      color: #111821;
+      font-weight: 600;
+    }
+
+    .calendar-info {
+      background: var(--dark-panel-soft);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #c4ceda;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 4px 0 4px;
+      padding: 0 2px;
+    }
+
+    .section-header strong {
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .section-header a {
+      text-decoration: none;
+      color: var(--primary-blue-dark);
+      font-size: 11px;
+    }
+
+    .feature-grid {
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 8px 4px 4px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-row-gap: 10px;
+      font-size: 11px;
+    }
+
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 4px 2px;
+      cursor: pointer;
+    }
+
+    .feature-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--secondary-light-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      font-size: 16px;
+      color: var(--primary-blue-dark);
+    }
+
+    .feature-label {
+      line-height: 1.3;
+    }
+
+    .market-summary {
+      margin-top: 10px;
+      background: var(--dark-panel);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #d3d9e3;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .market-col {
+      flex: 1;
+      text-align: center;
+    }
+
+    .market-col-title {
+      margin-bottom: 3px;
+    }
+
+    .market-value {
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .market-change {
+      font-size: 10px;
+    }
+
+    .market-change.up {
+      color: var(--down-green);
+    }
+
+    .market-change.down {
+      color: var(--up-red);
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 52px;
+      background: #ffffff;
+      border-top: 1px solid #dde3ec;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-secondary);
+    }
+
+    .nav-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    .nav-item.active {
+      color: var(--primary-blue-dark);
+      font-weight: 600;
+    }
+
+    .nav-item.active .nav-icon {
+      border-color: var(--primary-blue-dark);
+      background: var(--secondary-light-blue);
+    }
+
+    /* ---- 測驗畫面共用樣式 ---- */
+    .quiz-wrapper {
+      padding: 8px 8px 0;
+    }
+
+    .quiz-step {
+      font-size: 11px;
+      color: var(--secondary-gray-blue);
+      margin-bottom: 4px;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 12px 12px 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .quiz-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .quiz-question {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2a36;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-card {
+      border-radius: 10px;
+      border: 1px solid #d6e2f0;
+      background: #f8fbff;
+      padding: 8px 10px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .option-card:hover {
+      background: #edf6ff;
+      border-color: #4a9fe6;
+      transform: translateY(-1px);
+    }
+
+    .option-label {
+      font-weight: 700;
+      color: #2f6ca0;
+      flex-shrink: 0;
+    }
+
+    .option-text {
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .quiz-hint {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--secondary-gray-blue);
+    }
+
+    /* 結果畫面 */
+    .result-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2a36;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .result-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #ffe8c7;
+      color: #b26509;
+      margin-bottom: 10px;
+    }
+
+    .result-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .result-btn-row {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .result-btn {
+      border: none;
+      background: #4a9fe6;
+      color: #fff;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="status-bar"></div>
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="header-title">
+          <div class="header-icon-circle">✉</div>
+          <span>帳務首頁</span>
+          <span>|</span>
+          <span>e點通</span>
+        </div>
+        <div class="header-actions">
+          <div class="header-icon-circle">🔔</div>
+          <div class="header-icon-circle">⚙</div>
+        </div>
+      </div>
+
+      <div class="market-tabs" id="marketTabs">
+        <div class="market-tab active">台股</div>
+        <div class="market-tab">海外股市</div>
+        <div class="market-tab">期權</div>
+        <div class="market-tab">國外期貨</div>
+        <div class="market-tab">基金</div>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <main class="app-body">
+      <!-- 首頁：完全沿用第一個系統流程，改用「資金管理」進入測驗 -->
+      <section id="screenHome" class="screen active">
+        <!-- 我的資產卡片 -->
+        <section class="asset-card">
+          <div class="asset-header">
+            <span>我的資產</span>
+            <span class="dots">•••</span>
+          </div>
+          <div class="asset-lines">
+            <div>資產總現值 (NTD)</div>
+            <div>戶頭餘額 (NTD)</div>
+          </div>
+        </section>
+
+        <!-- 行事曆區塊 -->
+        <section class="dark-panel">
+          <div class="calendar-row" id="calendarRow">
+            <div class="calendar-day active">
+              <div>週一</div>
+              <div>25</div>
+            </div>
+            <div class="calendar-day">
+              <div>週二</div>
+              <div>26</div>
+            </div>
+            <div class="calendar-day">
+              <div>週三</div>
+              <div>27</div>
+            </div>
+            <div class="calendar-day">
+              <div>週四</div>
+              <div>28</div>
+            </div>
+            <div class="calendar-day">
+              <div>週五</div>
+              <div>29</div>
+            </div>
+          </div>
+          <div class="calendar-info">
+            法說會、重大公告、ETF 調整、投資展望等資訊示意文字⋯⋯
+          </div>
+        </section>
+
+        <!-- 常用功能 -->
+        <div class="section-header">
+          <strong>常用功能</strong>
+          <a href="#">更多 &gt;</a>
+        </div>
+
+        <section class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon">💰</div>
+            <div class="feature-label">台股下單</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🌎</div>
+            <div class="feature-label">海外股票</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-label">行情報價</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📈</div>
+            <div class="feature-label">ETF 導覽</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-label">自選追蹤</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🧾</div>
+            <div class="feature-label">覆盤日記</div>
+          </div>
+
+          <!-- ⭐ 心理測驗：連到 Q1 介面 -->
+          <div class="feature-item" id="btnFundTest">
+            <div class="feature-icon">❤️</div>
+            <div class="feature-label">心理測驗</div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon">⚙</div>
+            <div class="feature-label">更多功能</div>
+          </div>
+        </section>
+
+        <!-- 指數摘要 -->
+        <section class="market-summary">
+          <div class="market-col">
+            <div class="market-col-title">加權</div>
+            <div class="market-value">21536.67</div>
+            <div class="market-change up">+115.87 (+0.54%)</div>
+          </div>
+          <div class="market-col">
+            <div class="market-col-title">櫃買</div>
+            <div class="market-value">227.67</div>
+            <div class="market-change up">+1.12 (+0.49%)</div>
+          </div>
+          <div class="market-col">
+            <div class="market-col-title">台指期</div>
+            <div class="market-value">21396</div>
+            <div class="market-change down">-89 (-0.41%)</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- 第二個介面：Q1 -->
+      <section id="screenQ1" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-step">Q1 / 5</div>
+          <div class="quiz-card">
+            <div class="quiz-title">投資風格小測驗</div>
+            <div class="quiz-question">
+              當你開始「研究一檔股票」時，第一個會看的是？
+            </div>
+            <div class="options">
+              <div class="option-card" data-q="1" data-a="A" data-next="screenQ2">
+                <div class="option-label">A</div>
+                <div class="option-text">
+                  這家公司賺不賺錢？EPS、產業前景、財報體質好不好再說。
+                </div>
+              </div>
+              <div class="option-card" data-q="1" data-a="B" data-next="screenQ2">
+                <div class="option-label">B</div>
+                <div class="option-text">
+                  現在大盤和這個產業走在景氣的哪個階段？股價在技術面上是不是剛要起漲？
+                </div>
+              </div>
+              <div class="option-card" data-q="1" data-a="C" data-next="screenQ2">
+                <div class="option-label">C</div>
+                <div class="option-text">
+                  有沒有一兩個我信任的進出場規則可以遵循？先確認規則能不能用。
+                </div>
+              </div>
+            </div>
+            <div class="quiz-hint">點選一個選項，系統會自動帶你到下一題。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第三個介面：Q2 -->
+      <section id="screenQ2" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-step">Q2 / 5</div>
+          <div class="quiz-card">
+            <div class="quiz-title">投資風格小測驗</div>
+            <div class="quiz-question">
+              你理想中的「賺錢方式」最接近哪一種？
+            </div>
+            <div class="options">
+              <div class="option-card" data-q="2" data-a="A" data-next="screenQ3">
+                <div class="option-label">A</div>
+                <div class="option-text">
+                  找到被低估的好公司，合理價買進，抱幾年讓價值慢慢反映出來。
+                </div>
+              </div>
+              <div class="option-card" data-q="2" data-a="B" data-next="screenQ3">
+                <div class="option-label">B</div>
+                <div class="option-text">
+                  把握一段 3–12 個月的波段行情，上升趨勢中慢慢加碼、等待收割獲利。
+                </div>
+              </div>
+              <div class="option-card" data-q="2" data-a="C" data-next="screenQ3">
+                <div class="option-label">C</div>
+                <div class="option-text">
+                  只要出現我事先訂好的買訊就進，跌破停損線就出場，不去預測高低點。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第四個介面：Q3 -->
+      <section id="screenQ3" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-step">Q3 / 5</div>
+          <div class="quiz-card">
+            <div class="quiz-title">投資風格小測驗</div>
+            <div class="quiz-question">
+              當你買進後，股價突然跌了 10–15%，你最可能的反應是？
+            </div>
+            <div class="options">
+              <div class="option-card" data-q="3" data-a="A" data-next="screenQ4">
+                <div class="option-label">A</div>
+                <div class="option-text">
+                  回頭檢查基本面：如果公司體質沒變、長期還看好，就當打折促銷，考慮分批加碼。
+                </div>
+              </div>
+              <div class="option-card" data-q="3" data-a="B" data-next="screenQ4">
+                <div class="option-label">B</div>
+                <div class="option-text">
+                  先看大盤與產業是不是進入疲弱階段，如果景氣轉弱，就考慮減碼或換股。
+                </div>
+              </div>
+              <div class="option-card" data-q="3" data-a="C" data-next="screenQ4">
+                <div class="option-label">C</div>
+                <div class="option-text">
+                  不管原因是什麼，只要跌破我設定的關鍵均線或價位，就嚴格執行停損出場。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第五個介面：Q4 -->
+      <section id="screenQ4" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-step">Q4 / 5</div>
+          <div class="quiz-card">
+            <div class="quiz-title">投資風格小測驗</div>
+            <div class="quiz-question">
+              如果只能留下一種投資資訊，你最在意的是？
+            </div>
+            <div class="options">
+              <div class="option-card" data-q="4" data-a="A" data-next="screenQ5">
+                <div class="option-label">A</div>
+                <div class="option-text">
+                  完整的財報與估值分析（EPS、ROE、現金流、合理價區間）。
+                </div>
+              </div>
+              <div class="option-card" data-q="4" data-a="B" data-next="screenQ5">
+                <div class="option-label">B</div>
+                <div class="option-text">
+                  景氣循環＋產業趨勢搭配 KD、均線那種可以看出「現在是春夏秋冬哪一段」的工具。
+                </div>
+              </div>
+              <div class="option-card" data-q="4" data-a="C" data-next="screenQ5">
+                <div class="option-label">C</div>
+                <div class="option-text">
+                  清楚寫好的交易 S.O.P：什麼情況買、什麼情況加碼、什麼情況一定要賣出。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第六個介面：Q5 -->
+      <section id="screenQ5" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-step">Q5 / 5</div>
+          <div class="quiz-card">
+            <div class="quiz-title">投資風格小測驗</div>
+            <div class="quiz-question">
+              在理想的證券 App 裡，你最希望多一個什麼功能？
+            </div>
+            <div class="options">
+              <div class="option-card" data-q="5" data-a="A" data-next="screenResult">
+                <div class="option-label">A</div>
+                <div class="option-text">
+                  幫我把財報、估值、配息體質整理成「這家公司是不是值得長期持有」的評分或標籤。
+                </div>
+              </div>
+              <div class="option-card" data-q="5" data-a="B" data-next="screenResult">
+                <div class="option-label">B</div>
+                <div class="option-text">
+                  幫我把 EPS、產業動能、技術指標整合成「現在是佈局期／加碼期／收割期」的四季儀表板。
+                </div>
+              </div>
+              <div class="option-card" data-q="5" data-a="C" data-next="screenResult">
+                <div class="option-label">C</div>
+                <div class="option-text">
+                  幫我設定簡單明確的買進／停利／停損規則，價格或均線一到就跳出提醒，照著執行就好。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第七個介面：結果 -->
+      <section id="screenResult" class="screen">
+        <div class="quiz-wrapper">
+          <div class="quiz-card">
+            <div class="result-title">測驗結果</div>
+            <div style="text-align:center;margin-bottom:8px;">
+              <span class="result-tag">價值投資型</span>
+            </div>
+            <div class="result-text">
+              你是「價值投資型」：用耐心跟好公司做朋友，你重視基本面、討厭瞎忙，
+              寧願花時間研究好公司，也不想天天盯盤。
+            </div>
+            <div class="result-btn-row">
+              <button class="result-btn" id="btnBackHome">回到首頁</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Nav (裝飾用) -->
+    <nav class="bottom-nav" id="bottomNav">
+      <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <div>首頁</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">⭐</div>
+        <div>自選</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">💹</div>
+        <div>下單</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">📄</div>
+        <div>帳務</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">⋯</div>
+        <div>更多</div>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // 資金管理 → 進入 Q1
+    document.getElementById("btnFundTest").addEventListener("click", () => {
+      showScreen("screenQ1");
+    });
+
+    // 行事曆點選效果
+    document.getElementById("calendarRow").addEventListener("click", function (e) {
+      const day = e.target.closest(".calendar-day");
+      if (!day) return;
+      this.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("active"));
+      day.classList.add("active");
+    });
+
+    // Header tabs
+    document.getElementById("marketTabs").addEventListener("click", function (e) {
+      const tab = e.target.closest(".market-tab");
+      if (!tab) return;
+      this.querySelectorAll(".market-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+    });
+
+    // 底部 nav 高亮（純視覺）
+    document.getElementById("bottomNav").addEventListener("click", function (e) {
+      const item = e.target.closest(".nav-item");
+      if (!item) return;
+      this.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+      item.classList.add("active");
+    });
+
+    // 儲存使用者答案（如果之後要用得到）
+    const answers = {};
+
+    // 選項點選 → 存答案 + 跳下一畫面
+    document.addEventListener("click", function (e) {
+      const option = e.target.closest(".option-card");
+      if (!option) return;
+      const q = option.dataset.q;
+      const a = option.dataset.a;
+      const next = option.dataset.next;
+      if (q && a) answers[q] = a;
+      if (next) showScreen(next);
+    });
+
+    // 結果頁「回到首頁」
+    document.getElementById("btnBackHome").addEventListener("click", () => {
+      showScreen("screenHome");
+    });
+  </script>
+</body>
+</html>
